@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor"
-import { Program } from "@coral-xyz/anchor"
+import { Program, BN } from "@coral-xyz/anchor"
 import { Rpg, IDL } from "../target/types/rpg"
 import { assert } from "chai"
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet"
@@ -24,7 +24,10 @@ describe("RPG", () => {
 
     const txHash = await program.methods
       .createGame(
-        8 // 8 Items per player
+        8, // 8 Items per player
+        new BN(50_000), // AP per player creation
+        new BN(1_000), // AP per monster spawn
+        new BN(100), // AP per attack
       )
       .accounts({
         game: gameKey,
