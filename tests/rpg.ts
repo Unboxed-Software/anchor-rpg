@@ -26,9 +26,9 @@ describe("RPG", () => {
       .createGame(
         8, // 8 Items per player
         // SOLUTION EDIT:
-        new BN(50_000), // AP per player creation
-        new BN(1_000), // AP per monster spawn
-        new BN(100), // AP per attack
+        new BN(100), // AP per player creation
+        new BN(5), // AP per monster spawn
+        new BN(1), // AP per attack
       )
       .accounts({
         game: gameKey,
@@ -138,6 +138,8 @@ describe("RPG", () => {
     const txHash = await program.methods
       .attackMonster()
       .accounts({
+        // SOLUTION EDIT:
+        game: gameKey,
         playerAccount: playerKey,
         monster: monsterKey,
         player: player.publicKey,
