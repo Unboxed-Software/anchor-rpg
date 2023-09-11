@@ -397,6 +397,7 @@ pub fn run_collect_action_points(ctx: Context<CollectActionPoints>) -> Result<()
 pub mod rpg {
     use super::*;
 
+    // SOLUTION EDIT:
     pub fn create_game(ctx: Context<CreateGame>, max_items_per_player: u8, ap_per_player_creation: u64, ap_per_monster_spawn: u64, ap_per_monster_attack: u64) -> Result<()> {
         run_create_game(ctx, max_items_per_player, ap_per_player_creation, ap_per_monster_spawn, ap_per_monster_attack)?;
         sol_log_compute_units();

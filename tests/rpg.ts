@@ -25,6 +25,7 @@ describe("RPG", () => {
     const txHash = await program.methods
       .createGame(
         8, // 8 Items per player
+        // SOLUTION EDIT:
         new BN(50_000), // AP per player creation
         new BN(1_000), // AP per monster spawn
         new BN(100), // AP per attack
