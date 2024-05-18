@@ -2,66 +2,13 @@ use anchor_lang::prelude::*;
 use anchor_lang::system_program::{Transfer, transfer};
 use anchor_lang::solana_program::log::sol_log_compute_units;
 
+mod state;
+mod constants;
+
+use state::*;
+use constants::*;
+
 declare_id!("2jqUJr2sQzfNhzpTEnUnMbM2enCs4kQG6YTjmm1SZ9rN");
-
-// ----------- ACCOUNTS ----------
-#[account]
-pub struct Game { // 8 bytes
-    pub game_master: Pubkey,            // 32 bytes
-    pub treasury: Pubkey,               // 32 bytes
-    pub action_points_collected: u64,   // 8 bytes  
-    pub game_config: GameConfig,
-}
-
-#[account]
-pub struct Player { // 8 bytes
-    pub player: Pubkey,                 // 32 bytes
-    pub game: Pubkey,                   // 32 bytes
-    pub action_points_spent: u64,               // 8 bytes
-    pub action_points_to_be_collected: u64,     // 8 bytes
-    pub status_flag: u8,                // 8 bytes
-    pub experience: u64,                 // 8 bytes
-    pub kills: u64,                     // 8 bytes
-    pub next_monster_index: u64,        // 8 bytes
-    pub for_future_use: [u8; 256],      // Attack/Speed/Defense/Health/Mana?? Metadata??
-    pub inventory: Vec<InventoryItem>,  // Max 8 items
-}
-
-#[account]
-pub struct Monster { // 8 bytes
-    pub player: Pubkey,                 // 32 bytes
-    pub game: Pubkey,                   // 32 bytes
-    pub hitpoints: u64,                 // 8 bytes
-}
-
-// ----------- GAME CONFIG ----------
-
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct GameConfig {
-    pub max_items_per_player: u8,
-    pub for_future_use: [u64; 16], // Health of Enemies?? Experience per item?? Action Points per Action??
-}
-
-// ----------- STATUS ----------
-
-const IS_FROZEN_FLAG: u8 = 1 << 0;
-const IS_POISONED_FLAG: u8 = 1 << 1;
-const IS_BURNING_FLAG: u8 = 1 << 2;
-const IS_BLESSED_FLAG: u8 = 1 << 3;
-const IS_CURSED_FLAG: u8 = 1 << 4;
-const IS_STUNNED_FLAG: u8 = 1 << 5;
-const IS_SLOWED_FLAG: u8 = 1 << 6;
-const IS_BLEEDING_FLAG: u8 = 1 << 7;
-const NO_EFFECT_FLAG: u8 = 0b00000000;
-
-// ----------- INVENTORY ----------
-
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct InventoryItem {
-    pub name: [u8; 32], // Fixed Name up to 32 bytes
-    pub amount: u64,
-    pub for_future_use: [u8; 128], // Metadata?? // Effects // Flags?
-}
 
 // ----------- HELPER ----------
 
