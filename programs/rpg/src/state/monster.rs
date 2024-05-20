@@ -1,8 +1,9 @@
 use anchor_lang::prelude::*;
 
 #[account]
-pub struct Monster { // 8 bytes
-    pub player: Pubkey,                 // 32 bytes
-    pub game: Pubkey,                   // 32 bytes
-    pub hitpoints: u64,                 // 8 bytes
+#[derive(InitSpace)]
+pub struct Monster {
+    pub player: Pubkey,
+    pub game: Pubkey,
+    pub hitpoints: u64,
 }
