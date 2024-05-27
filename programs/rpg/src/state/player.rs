@@ -13,7 +13,7 @@ pub struct Player {
     pub experience: u64,
     pub kills: u64,
     pub next_monster_index: u64,
-    pub for_future_use: [u8; 256],      // Attack/Speed/Defense/Health/Mana?? Metadata??
+    pub for_future_use: [u8; 256],  // Attack/Speed/Defense/Health/Mana?? Metadata??
     #[max_len(MAX_INVENTORY_ITEMS)] // Max 8 items
     pub inventory: Vec<InventoryItem>,
 }
