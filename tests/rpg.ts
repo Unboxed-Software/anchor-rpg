@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Program, BN } from "@coral-xyz/anchor"
-import { Rpg, IDL } from "../target/types/rpg"
+import { Rpg } from "../target/types/rpg"
 import { assert } from "chai"
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet"
 
@@ -30,7 +30,7 @@ describe("RPG", () => {
         new BN(5), // AP per monster spawn
         new BN(1), // AP per attack
       )
-      .accounts({
+      .accountsPartial({
         game: gameKey,
         gameMaster: gameMaster.publicKey,
         treasury: treasury.publicKey,
@@ -58,7 +58,7 @@ describe("RPG", () => {
 
     const txHash = await program.methods
       .createPlayer()
-      .accounts({
+      .accountsPartial({
         game: gameKey,
         playerAccount: playerKey,
         player: player.publicKey,
@@ -97,7 +97,7 @@ describe("RPG", () => {
 
     const txHash = await program.methods
       .spawnMonster()
-      .accounts({
+      .accountsPartial({
         game: gameKey,
         playerAccount: playerKey,
         monster: monsterKey,
@@ -137,7 +137,7 @@ describe("RPG", () => {
 
     const txHash = await program.methods
       .attackMonster()
-      .accounts({
+      .accountsPartial({
         // SOLUTION EDIT:
         game: gameKey,
         playerAccount: playerKey,
@@ -177,17 +177,12 @@ describe("RPG", () => {
       new NodeWallet(clockworkWallet),
       anchor.AnchorProvider.defaultOptions()
     )
-    const clockworkProgram = new anchor.Program<Rpg>(
-      IDL,
-      program.programId,
-      clockworkProvider
-    )
 
     // Have to give the accounts some lamports else the tx will fail
     const amountToInitialize = 10000000000
 
     const clockworkAirdropTx =
-      await clockworkProgram.provider.connection.requestAirdrop(
+      await clockworkProvider.connection.requestAirdrop(
         clockworkWallet.publicKey,
         amountToInitialize
       )
@@ -197,7 +192,7 @@ describe("RPG", () => {
     )
 
     const treasuryAirdropTx =
-      await clockworkProgram.provider.connection.requestAirdrop(
+      await clockworkProvider.connection.requestAirdrop(
         treasury.publicKey,
         amountToInitialize
       )
@@ -206,9 +201,9 @@ describe("RPG", () => {
       "confirmed"
     )
 
-    const txHash = await clockworkProgram.methods
+    const txHash = await program.methods
       .depositActionPoints()
-      .accounts({
+      .accountsPartial({
         game: gameKey,
         player: playerKey,
         treasury: treasury.publicKey,
@@ -223,7 +218,7 @@ describe("RPG", () => {
       treasury.publicKey
     )
     assert(
-      treasuryBalance == amountToInitialize + expectedActionPoints // Player Create ( 100 ) + Monster Spawn ( 5 ) + Monster Attack ( 1 )
+      treasuryBalance == amountToInitialize + expectedActionPoints, "Wrong Action Points" // Player Create ( 100 ) + Monster Spawn ( 5 ) + Monster Attack ( 1 )
     )
 
     const gameAccount = await program.account.game.fetch(gameKey)
