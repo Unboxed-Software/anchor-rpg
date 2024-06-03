@@ -1,16 +1,16 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Program } from "@coral-xyz/anchor"
-import { Rpg, IDL } from "../target/types/rpg"
+import { Rpg } from "../target/types/rpg"
 import { assert } from "chai"
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet"
 
 describe("RPG", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env())
+  const provider = anchor.AnchorProvider.env()
+  anchor.setProvider(provider)
 
   const program = anchor.workspace.Rpg as Program<Rpg>
-  const wallet = anchor.workspace.Rpg.provider.wallet
-    .payer as anchor.web3.Keypair
+  const wallet = provider.wallet as NodeWallet
   const gameMaster = wallet
   const player = wallet
 
@@ -18,22 +18,25 @@ describe("RPG", () => {
 
   it("Create Game", async () => {
     const [gameKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("GAME"), treasury.publicKey.toBuffer()],
+      [
+        Buffer.from("GAME"), 
+        treasury.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const txHash = await program.methods
-      .createGame(
+    .createGame(
         8 // 8 Items per player
-      )
-      .accounts({
-        game: gameKey,
-        gameMaster: gameMaster.publicKey,
-        treasury: treasury.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .signers([treasury])
-      .rpc()
+    )
+    .accountsPartial({
+      game: gameKey,
+      gameMaster: gameMaster.publicKey,
+      treasury: treasury.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .signers([treasury])
+    .rpc()
 
     await program.provider.connection.confirmTransaction(txHash)
 
@@ -43,26 +46,33 @@ describe("RPG", () => {
 
   it("Create Player", async () => {
     const [gameKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("GAME"), treasury.publicKey.toBuffer()],
+      [
+        Buffer.from("GAME"), 
+        treasury.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const [playerKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("PLAYER"), gameKey.toBuffer(), player.publicKey.toBuffer()],
+      [
+        Buffer.from("PLAYER"), 
+        gameKey.toBuffer(), 
+        player.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const txHash = await program.methods
-      .createPlayer()
-      .accounts({
-        game: gameKey,
-        playerAccount: playerKey,
-        player: player.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc()
+    .createPlayer()
+    .accountsPartial({
+      game: gameKey,
+      playerAccount: playerKey,
+      player: player.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc()
 
-    await program.provider.connection.confirmTransaction(txHash)
+    await provider.connection.confirmTransaction(txHash)
 
     // Print out if you'd like
     // const account = await program.account.player.fetch(playerKey);
@@ -70,12 +80,19 @@ describe("RPG", () => {
 
   it("Spawn Monster", async () => {
     const [gameKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("GAME"), treasury.publicKey.toBuffer()],
+      [
+        Buffer.from("GAME"), 
+        treasury.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const [playerKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("PLAYER"), gameKey.toBuffer(), player.publicKey.toBuffer()],
+      [
+        Buffer.from("PLAYER"), 
+        gameKey.toBuffer(), 
+        player.publicKey.toBuffer()
+      ],
       program.programId
     )
 
@@ -92,17 +109,17 @@ describe("RPG", () => {
     )
 
     const txHash = await program.methods
-      .spawnMonster()
-      .accounts({
-        game: gameKey,
-        playerAccount: playerKey,
-        monster: monsterKey,
-        player: player.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc()
+    .spawnMonster()
+    .accountsPartial({
+      game: gameKey,
+      playerAccount: playerKey,
+      monster: monsterKey,
+      player: player.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc()
 
-    await program.provider.connection.confirmTransaction(txHash)
+    await provider.connection.confirmTransaction(txHash)
 
     // Print out if you'd like
     // const account = await program.account.monster.fetch(monsterKey);
@@ -110,12 +127,19 @@ describe("RPG", () => {
 
   it("Attack Monster", async () => {
     const [gameKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("GAME"), treasury.publicKey.toBuffer()],
+      [
+        Buffer.from("GAME"), 
+        treasury.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const [playerKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("PLAYER"), gameKey.toBuffer(), player.publicKey.toBuffer()],
+      [
+        Buffer.from("PLAYER"), 
+        gameKey.toBuffer(), 
+        player.publicKey.toBuffer()
+      ],
       program.programId
     )
 
@@ -132,16 +156,16 @@ describe("RPG", () => {
     )
 
     const txHash = await program.methods
-      .attackMonster()
-      .accounts({
-        playerAccount: playerKey,
-        monster: monsterKey,
-        player: player.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc()
+    .attackMonster()
+    .accountsPartial({
+      playerAccount: playerKey,
+      monster: monsterKey,
+      player: player.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc()
 
-    await program.provider.connection.confirmTransaction(txHash)
+    await provider.connection.confirmTransaction(txHash)
 
     // Print out if you'd like
     // const account = await program.account.monster.fetch(monsterKey);
@@ -152,12 +176,19 @@ describe("RPG", () => {
 
   it("Deposit Action Points", async () => {
     const [gameKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("GAME"), treasury.publicKey.toBuffer()],
+      [
+        Buffer.from("GAME"), 
+        treasury.publicKey.toBuffer()
+      ],
       program.programId
     )
 
     const [playerKey] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("PLAYER"), gameKey.toBuffer(), player.publicKey.toBuffer()],
+      [
+        Buffer.from("PLAYER"), 
+        gameKey.toBuffer(), 
+        player.publicKey.toBuffer()
+      ],
       program.programId
     )
 
@@ -171,54 +202,43 @@ describe("RPG", () => {
       new NodeWallet(clockworkWallet),
       anchor.AnchorProvider.defaultOptions()
     )
-    const clockworkProgram = new anchor.Program<Rpg>(
-      IDL,
-      program.programId,
-      clockworkProvider
-    )
 
     // Have to give the accounts some lamports else the tx will fail
     const amountToInitialize = 10000000000
 
-    const clockworkAirdropTx =
-      await clockworkProgram.provider.connection.requestAirdrop(
-        clockworkWallet.publicKey,
-        amountToInitialize
-      )
-    await program.provider.connection.confirmTransaction(
+    const clockworkAirdropTx = await clockworkProvider.connection.requestAirdrop(
+      clockworkWallet.publicKey,
+      amountToInitialize
+    )
+
+    await clockworkProvider.connection.confirmTransaction(
       clockworkAirdropTx,
       "confirmed"
     )
 
-    const treasuryAirdropTx =
-      await clockworkProgram.provider.connection.requestAirdrop(
-        treasury.publicKey,
-        amountToInitialize
-      )
+    const treasuryAirdropTx = await clockworkProvider.connection.requestAirdrop(
+      treasury.publicKey,
+      amountToInitialize
+    )
+    
     await program.provider.connection.confirmTransaction(
       treasuryAirdropTx,
       "confirmed"
     )
 
-    const txHash = await clockworkProgram.methods
-      .depositActionPoints()
-      .accounts({
-        game: gameKey,
-        player: playerKey,
-        treasury: treasury.publicKey,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .rpc()
-
-    await program.provider.connection.confirmTransaction(txHash)
+    const txHash = await program.methods
+    .depositActionPoints()
+    .accountsPartial({
+      game: gameKey,
+      player: playerKey,
+      treasury: treasury.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc()
 
     const expectedActionPoints = 100 + 5 + 1 // Player Create ( 100 ) + Monster Spawn ( 5 ) + Monster Attack ( 1 )
-    const treasuryBalance = await program.provider.connection.getBalance(
-      treasury.publicKey
-    )
-    assert(
-      treasuryBalance == amountToInitialize + expectedActionPoints // Player Create ( 100 ) + Monster Spawn ( 5 ) + Monster Attack ( 1 )
-    )
+    const treasuryBalance = await provider.connection.getBalance(treasury.publicKey)
+    assert(treasuryBalance == amountToInitialize + expectedActionPoints) // Player Create ( 100 ) + Monster Spawn ( 5 ) + Monster Attack ( 1 )
 
     const gameAccount = await program.account.game.fetch(gameKey)
     assert(gameAccount.actionPointsCollected.eqn(expectedActionPoints))
