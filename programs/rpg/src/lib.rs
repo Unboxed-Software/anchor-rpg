@@ -4,12 +4,12 @@ use anchor_lang::solana_program::log::sol_log_compute_units;
 declare_id!("2jqUJr2sQzfNhzpTEnUnMbM2enCs4kQG6YTjmm1SZ9rN");
 
 mod state;
-mod contexts;
+mod instructions;
 mod constants;
 mod helpers;
 
 use state::*;
-use contexts::*;
+use instructions::*;
 use constants::*;
 use helpers::*;
 
