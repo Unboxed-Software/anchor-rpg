@@ -10,7 +10,7 @@ use state::*;
 use constants::*;
 use instructions::*;
 
-declare_id!("2jqUJr2sQzfNhzpTEnUnMbM2enCs4kQG6YTjmm1SZ9rN");
+declare_id!("5Sc3gJv4tvPiFzE75boYMJabbNRs44zRhtT23fLdKewz");
 
 #[program]
 pub mod rpg {
