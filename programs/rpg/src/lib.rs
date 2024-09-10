@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::log::sol_log_compute_units;
 
-declare_id!("2jqUJr2sQzfNhzpTEnUnMbM2enCs4kQG6YTjmm1SZ9rN");
+declare_id!("5Sc3gJv4tvPiFzE75boYMJabbNRs44zRhtT23fLdKewz");
 
 mod state;
 mod instructions;

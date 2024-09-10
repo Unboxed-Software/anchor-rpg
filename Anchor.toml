@@ -1,8 +1,11 @@
+[toolchain]
+
 [features]
-seeds = false
+resolution = true
 skip-lint = false
+
 [programs.localnet]
-rpg = "2jqUJr2sQzfNhzpTEnUnMbM2enCs4kQG6YTjmm1SZ9rN"
+rpg = "5Sc3gJv4tvPiFzE75boYMJabbNRs44zRhtT23fLdKewz"
 
 [registry]
 url = "https://api.apr.dev"
