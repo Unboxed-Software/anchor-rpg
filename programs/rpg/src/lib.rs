@@ -7,6 +7,7 @@ mod state;
 mod instructions;
 mod constants;
 mod helpers;
+mod error;
 
 use state::*;
 use instructions::*;
@@ -18,38 +19,45 @@ pub mod rpg {
     use super::*;
 
     // SOLUTION EDIT:
-    pub fn create_game(ctx: Context<CreateGame>, max_items_per_player: u8, ap_per_player_creation: u64, ap_per_monster_spawn: u64, ap_per_monster_attack: u64) -> Result<()> {
-        ctx.accounts.run_create_game(max_items_per_player, ap_per_player_creation, ap_per_monster_spawn, ap_per_monster_attack)?;
+    pub fn create_game(
+        ctx: Context<CreateGame>,
+        max_items_per_player: u8,
+        ap_per_player_creation: u64,
+        ap_per_monster_spawn: u64,
+        ap_per_monster_attack: u64
+    ) -> Result<()> {
+        run_create_game(
+            ctx,
+            max_items_per_player,
+            ap_per_player_creation,
+            ap_per_monster_spawn,
+            ap_per_monster_attack
+        )?;
         sol_log_compute_units();
-
         Ok(())
     }
 
     pub fn create_player(ctx: Context<CreatePlayer>) -> Result<()> {
-        ctx.accounts.run_create_player()?;
+        run_create_player(ctx)?;
         sol_log_compute_units();
-
         Ok(())
     }
 
     pub fn spawn_monster(ctx: Context<SpawnMonster>) -> Result<()> {
-        ctx.accounts.run_spawn_monster()?;
+        run_spawn_monster(ctx)?;
         sol_log_compute_units();
-
         Ok(())
     }
 
     pub fn attack_monster(ctx: Context<AttackMonster>) -> Result<()> {
-        ctx.accounts.run_attack_monster()?;
+        run_attack_monster(ctx)?;
         sol_log_compute_units();
-
         Ok(())
     }
 
     pub fn deposit_action_points(ctx: Context<CollectActionPoints>) -> Result<()> {
-        ctx.accounts.run_collect_action_points()?;
+        run_collect_action_points(ctx)?;
         sol_log_compute_units();
-        
         Ok(())
     }
 }
