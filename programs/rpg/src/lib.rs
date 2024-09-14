@@ -5,6 +5,7 @@ mod state;
 mod instructions;
 mod constants;
 mod helpers;
+mod error;
 
 use state::*;
 use constants::*;

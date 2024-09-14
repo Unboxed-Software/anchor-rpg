@@ -1,37 +1,50 @@
 use anchor_lang::prelude::*;
-
-use crate::{Game, Player};
+use crate::{error::RpgError, Game, Player};
 
 #[derive(Accounts)]
 pub struct CollectActionPoints<'info> {
     #[account(
         mut,
-        has_one=treasury
+        has_one = treasury @ RpgError::InvalidTreasury
     )]
     pub game: Box<Account<'info, Game>>,
     #[account(
         mut,
-        has_one=game
+        has_one = game @ RpgError::PlayerGameMismatch
     )]
     pub player: Box<Account<'info, Player>>,
     #[account(mut)]
     /// CHECK: It's being checked in the game account
-    pub treasury: AccountInfo<'info>,
+    pub treasury: UncheckedAccount<'info>,
     pub system_program: Program<'info, System>,
 }
 
-// literally anyone who pays for the TX fee can run this command - give it to a clockwork bot
+// Literally anyone who pays for the TX fee can run this command - give it to a clockwork bot
 pub fn run_collect_action_points(ctx: Context<CollectActionPoints>) -> Result<()> {
-    let transfer_amount: u64 = ctx.accounts.player.action_points_to_be_collected;
+    let transfer_amount = ctx.accounts.player.action_points_to_be_collected;
 
-    **ctx.accounts.player.to_account_info().try_borrow_mut_lamports()? -= transfer_amount;
-    **ctx.accounts.treasury.to_account_info().try_borrow_mut_lamports()? += transfer_amount;
+    // Transfer lamports from player to treasury
+    let player_info = ctx.accounts.player.to_account_info();
+    let treasury_info = ctx.accounts.treasury.to_account_info();
+
+    **player_info.try_borrow_mut_lamports()? = player_info
+        .lamports()
+        .checked_sub(transfer_amount)
+        .ok_or(RpgError::InsufficientFunds)?;
+
+    **treasury_info.try_borrow_mut_lamports()? = treasury_info
+        .lamports()
+        .checked_add(transfer_amount)
+        .ok_or(RpgError::ArithmeticOverflow)?;
 
     ctx.accounts.player.action_points_to_be_collected = 0;
 
-    ctx.accounts.game.action_points_collected = ctx.accounts.game.action_points_collected.checked_add(transfer_amount).unwrap();
+    ctx.accounts.game.action_points_collected = ctx.accounts.game
+        .action_points_collected
+        .checked_add(transfer_amount)
+        .ok_or(RpgError::ArithmeticOverflow)?;
 
-    msg!("The treasury collected {} action points to treasury", transfer_amount);
+    msg!("The treasury collected {} action points", transfer_amount);
 
     Ok(())
 }
