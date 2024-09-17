@@ -13,7 +13,7 @@ pub struct CreatePlayer<'info> {
     pub game: Box<Account<'info, Game>>,
     #[account(
         init, 
-        seeds=[
+        seeds = [
             b"PLAYER", 
             game.key().as_ref(), 
             player.key().as_ref()
@@ -28,30 +28,30 @@ pub struct CreatePlayer<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> CreatePlayer <'info> {
-    pub fn run_create_player(&mut self) -> Result<()> {
+pub fn run_create_player(ctx: Context<CreatePlayer>) -> Result<()> {
+    let game = &ctx.accounts.game;
+    let player_account = &mut ctx.accounts.player_account;
+    let player = &ctx.accounts.player;
+    let system_program = &ctx.accounts.system_program;
 
-        self.player_account.player = self.player.key().clone();
-        self.player_account.game = self.game.key().clone();
+    player_account.player = player.key();
+    player_account.game = game.key();
 
-        self.player_account.status_flag = NO_EFFECT_FLAG;
-        self.player_account.experience = 0;
-        self.player_account.kills = 0;
+    player_account.status_flag = NO_EFFECT_FLAG;
+    player_account.experience = 0;
+    player_account.kills = 0;
 
-        msg!("Hero has entered the game!");
+    msg!("Hero has entered the game!");
 
-        {   
-            // SOLUTION EDIT:
-            let action_points_to_spend = self.game.game_config.ap_per_player_creation;
+    // SOLUTION EDIT:
+    let action_points_to_spend = game.game_config.ap_per_player_creation;
 
-            spend_action_points(
-                action_points_to_spend, 
-                &mut self.player_account,
-                &self.player.to_account_info(), 
-                &self.system_program.to_account_info()
-            )?;
-        }
+    spend_action_points(
+        action_points_to_spend, 
+        player_account,
+        &player.to_account_info(), 
+        &system_program.to_account_info()
+    )?;
 
-        Ok(())
-    }
+    Ok(())
 }

@@ -5,20 +5,22 @@ use crate::{
     Game, 
     Monster,
     Player, 
-    ANCHOR_DISCRIMINATOR
+    ANCHOR_DISCRIMINATOR,
+    error::RpgError
 };
 
 #[derive(Accounts)]
 pub struct SpawnMonster<'info> {
     pub game: Box<Account<'info, Game>>,
-    #[account(mut,
+    #[account(
+        mut,
         has_one = game,
         has_one = player,
     )]
     pub player_account: Box<Account<'info, Player>>,
     #[account(
         init, 
-        seeds=[
+        seeds = [
             b"MONSTER", 
             game.key().as_ref(), 
             player.key().as_ref(),
@@ -34,26 +36,32 @@ pub struct SpawnMonster<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> SpawnMonster<'info> {
-    pub fn run_spawn_monster(&mut self) -> Result<()> {
-        self.monster.player = self.player.key().clone();
-        self.monster.game = self.game.key().clone();
-        self.monster.hitpoints = 100;
+pub fn run_spawn_monster(ctx: Context<SpawnMonster>) -> Result<()> {
+    let game = &ctx.accounts.game;
+    let player_account = &mut ctx.accounts.player_account;
+    let monster = &mut ctx.accounts.monster;
+    let player = &ctx.accounts.player;
+    let system_program = &ctx.accounts.system_program;
 
-        msg!("Monster Spawned!");
+    monster.player = player.key();
+    monster.game = game.key();
+    monster.hitpoints = 100;
 
-        self.player_account.next_monster_index = self.player_account.next_monster_index.checked_add(1).unwrap();
+    msg!("Monster Spawned!");
 
-        // SOLUTION EDIT:
-        let action_point_to_spend = self.game.game_config.ap_per_monster_spawn;
+    player_account.next_monster_index = player_account.next_monster_index
+        .checked_add(1)
+        .ok_or(error!(RpgError::ArithmeticOverflow))?;
 
-        spend_action_points(
-            action_point_to_spend, 
-            &mut self.player_account,
-            &self.player.to_account_info(), 
-            &self.system_program.to_account_info()
-        )?;
+    // SOLUTION EDIT:
+    let action_points_to_spend = game.game_config.ap_per_monster_spawn;
 
-        Ok(())
-    }
+    spend_action_points(
+        action_points_to_spend, 
+        player_account,
+        &player.to_account_info(), 
+        &system_program.to_account_info()
+    )?;
+
+    Ok(())
 }
